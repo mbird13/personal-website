@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chess Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            margin-bottom: 10px;
+        }
+        #chessboard {
+            display: grid;
+            grid-template-columns: repeat(8, 50px);
+            grid-template-rows: repeat(8, 50px);
+            border: 2px solid #333;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            background: #333;
+        }
+        .square {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .light {
+            background: #f0d9b5;
+        }
+        .dark {
+            background: #b58863;
+        }
+        #status {
+            margin: 15px 0;
+            font-size: 18px;
+        }
+        #resetBtn {
+            padding: 8px 16px;
+            font-size: 16px;
+            background: #333;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #resetBtn:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body>
+    <h1>Chess Game</h1>
+    <div id="status">White's turn</div>
+    <div id="chessboard"></div>
+    <button id="resetBtn">Reset Board</button>
+
+    <script>
+        // Unicode chess pieces
+        const PIECES = {
+            'r': '♜', 'n': '♞', 'b': '♝', 'q': '♛', 'k': '♚', 'p': '♟',
+            'R': '♖', 'N': '♘', 'B': '♗', 'Q': '♕', 'K': '♔', 'P': '♙'
+        };
+
+        // Initial board setup (FEN-like)
+        const START_BOARD = [
+            ['r','n','b','q','k','b','n','r'],
+            ['p','p','p','p','p','p','p','p'],
+            ['','','','','','','',''],
+            ['','','','','','','',''],
+            ['','','','','','','',''],
+            ['','','','','','','',''],
+            ['P','P','P','P','P','P','P','P'],
+            ['R','N','B','Q','K','B','N','R']
+        ];
+
+        let board = [];
+        let selected = null;
+        let turn = 'w'; // 'w' for white, 'b' for black
+
+        function renderBoard() {
+            const chessboard = document.getElementById('chessboard');
+            chessboard.innerHTML = '';
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    const square = document.createElement('div');
+                    square.className = 'square ' + ((row + col) % 2 === 0 ? 'light' : 'dark');
+                    square.dataset.row = row;
+                    square.dataset.col = col;
+                    if (selected && selected.row === row && selected.col === col) {
+                        square.style.outline = '2px solid #00f';
+                    }
+                    const piece = board[row][col];
+                    if (piece) square.textContent = PIECES[piece];
+                    square.addEventListener('click', onSquareClick);
+                    chessboard.appendChild(square);
+                }
+            }
+        }
+
+        function onSquareClick(e) {
+            const row = parseInt(e.currentTarget.dataset.row);
+            const col = parseInt(e.currentTarget.dataset.col);
+            const piece = board[row][col];
+
+            if (selected) {
+                // Try to move
+                if ((selected.row !== row || selected.col !== col) &&
+                        isValidMove(selected, {row, col})) {
+                    board[row][col] = board[selected.row][selected.col];
+                    board[selected.row][selected.col] = '';
+                    selected = null;
+                    turn = turn === 'w' ? 'b' : 'w';
+                    updateStatus();
+                } else {
+                    selected = null;
+                }
+            } else if (piece && isPieceTurn(piece)) {
+                selected = {row, col};
+            }
+            renderBoard();
+        }
+
+        function isPieceTurn(piece) {
+            return (turn === 'w' && piece === piece.toUpperCase()) ||
+                         (turn === 'b' && piece === piece.toLowerCase());
+        }
+
+        function isValidMove(from, to) {
+            // For frontend demo: allow any move to empty or opponent's square
+            const movingPiece = board[from.row][from.col];
+            const targetPiece = board[to.row][to.col];
+            if (!movingPiece) return false;
+            if (targetPiece && isPieceTurn(targetPiece) === isPieceTurn(movingPiece)) return false;
+            return true;
+        }
+
+        function updateStatus() {
+            document.getElementById('status').textContent = turn === 'w' ? "White's turn" : "Black's turn";
+        }
+
+        function resetBoard() {
+            board = START_BOARD.map(row => row.slice());
+            selected = null;
+            turn = 'w';
+            updateStatus();
+            renderBoard();
+        }
+
+        document.getElementById('resetBtn').addEventListener('click', resetBoard);
+
+        // Initialize
+        resetBoard();
+    </script>
+</body>
+</html>
