@@ -13,9 +13,18 @@
             margin: 0;
             padding: 20px;
         }
-        h1 {
-            margin-bottom: 10px;
+
+        button {
+            padding: 0.7rem;
+            border: none;
+            border-radius: 5px;
+            background: #4CAF50;
+            color: #fff;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 0.5rem;
         }
+
         #chessboard {
             display: grid;
             grid-template-columns: repeat(8, 50px);
@@ -56,15 +65,125 @@
         #resetBtn:hover {
             background: #555;
         }
+
+        #menu {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            width: 100%;
+            align-items: center;
+            height: 70vh;
+        }
+
+        #gamesList {
+            background-color: #f0d9b5;
+            flex: 1;
+            border-radius: 10px;
+            padding: 20px;
+            height: 100%;
+        }
+
+        #customization {
+            background-color: #b58863;
+            flex: 1;
+            color: white;
+            border-radius: 10px;
+            padding: 20px;
+            height: 100%;
+        }
+
+        #gamesList h2, #customization h2 {
+            text-align: center;
+        }
+
+        /* Popup overlay */
+        .popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); 
+            justify-content: center;
+            align-items: center;
+            z-index: 1000; 
+        }
     </style>
 </head>
 <body>
     <h1>Chess Game</h1>
-    <div id="status">White's turn</div>
-    <div id="chessboard"></div>
-    <button id="resetBtn">Reset Board</button>
+    <div id="menu">
+        <div id="gamesList">
+            <h2>Available Games</h2>
+            <button id="createGameBtn">Create New Game</button>
+            <ul id="gameList">
+                <!-- Game list will be populated here -->
+            </ul>
+        </div>
+        <div id="customization">
+            <h2>Customize Your Game</h2>
+        </div>
+    </div>
+    <div id="game" style="display: none;">
+        <div id="status">White's turn</div>
+        <div id="chessboard"></div>
+        <button id="resetBtn">Reset Board</button>
+    </div>
 
     <script>
+
+        /**
+         * Game list and customization
+         **/
+        const serverUrl = 'http://localhost:4567';
+        const gameList = document.getElementById('gameList');
+        const games = [];
+
+        async function populateGameList() {
+            try {
+                const user = JSON.parse(localStorage.getItem('user')) || null;
+                if (!user) {
+                    window.location.href = '/chessLogin.html';
+                    return;
+                }
+
+                const gameListResponse = await fetch(serverUrl + '/game', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': user.authToken
+                    }
+                });
+
+                if (gameListResponse.ok) {
+                    const gamesData = await gameListResponse.json();
+                    gamesData.games.forEach(game => {
+                        const li = document.createElement('li');
+                        li.textContent = game.name;
+                        li.addEventListener('click', () => joinGame(game.id));
+                        gameList.appendChild(li);
+                    });
+                } else {
+                    console.error('Failed to fetch games list');
+                    window.location.href = '/chessLogin.html';
+                }
+            } catch (error) {
+                console.error('Error fetching games list:', error);
+                window.location.href = '/chessLogin.html';
+            }
+        }
+
+        populateGameList();
+
+        function joinGame(gameId) {
+            console.error('NOT IMPLEMENTED: joining game ' + gameId);
+            document.getElementById('game').style.display = 'flex';
+            document.getElementById('menu').style.display = 'none';
+        }
+
+        /**
+         * Game Logic
+         **/
         // Unicode chess pieces
         const PIECES = {
             'r': '♜', 'n': '♞', 'b': '♝', 'q': '♛', 'k': '♚', 'p': '♟',
@@ -85,6 +204,7 @@
 
         let board = [];
         let selected = null;
+        let state = 'menu'; // 'menu' or 'game'
         let turn = 'w'; // 'w' for white, 'b' for black
 
         function renderBoard() {

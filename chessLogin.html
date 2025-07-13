@@ -138,6 +138,8 @@
                 });
             const j = await r.json();
                 if (r.ok) {
+                    console.log('Registration successful:', j);
+                    localStorage.setItem('user', JSON.stringify(j));
                     window.location.href = '/chess.html';
                 } else {
                     alert('Registration failed. Please check your credentials.');
