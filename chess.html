@@ -166,6 +166,7 @@
         const serverUrl = 'http://localhost:4567';
         const gameList = document.getElementById('gameList');
         const games = [];
+        let myGameId = null;
 
         async function populateGameList() {
             try {
@@ -203,8 +204,67 @@
 
         populateGameList();
 
-        function joinGame(gameId) {
+        let gameSocket = null;
+
+        async function joinGame(gameId) {
             console.error('NOT IMPLEMENTED: joining game ' + gameId);
+
+            const user = JSON.parse(localStorage.getItem('user')) || null;
+
+            try {
+                const r = await fetch(`${serverUrl}/game`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': user.authToken,
+                        },
+                    body: JSON.stringify({playerColor: 'WHITE', gameID: gameId})
+                });
+
+                if (!r.ok) {
+                    alert('Failed to join game. Please try again.');
+                    return;
+                }
+                myGameId = gameId;
+
+                gameSocket = new WebSocket(`${serverUrl.replace('http://', 'ws://')}/ws`);
+
+                gameSocket.onopen = () => {
+                    gameSocket.send(JSON.stringify({
+                        commandType: 'CONNECT',
+                        gameID: gameId,
+                        authToken: user.authToken
+                    }));
+                }
+
+                gameSocket.onmessage = (event) => {
+                    const message = JSON.parse(event.data);
+                    console.log('Received message:', message);
+                    if (message.serverMessageType === 'LOAD_GAME') {
+                        const gameData = message.game;
+                        board = gameData.board;
+                        turn = gameData.teamTurn;
+                        gameOver = gameData.gameOver;
+                        selected = null;
+                        renderBoard();
+                        updateStatus();
+                    } else if (message.serverMessageType === 'NOTIFICATION') {
+                        notifications.push(message.message);
+                        console.log('Notification:', message.message);
+                    } else if (message.serverMessageType === 'ERROR') {
+                        console.error('Error:', message.errorMessage);
+                        alert(message.errorMessage);
+                    } else {
+                        console.warn('Unknown message type:', message.serverMessageType);
+                    }
+                }
+
+            } catch (error) {
+                console.error('Error joining game:', error);
+                alert('An error occurred while joining the game. Please try again later.');
+            }
+
+
             document.getElementById('game').style.display = 'block';
             document.getElementById('menu').style.display = 'none';
         }
@@ -250,7 +310,7 @@
          **/
         // Unicode chess pieces
         const PIECES = {
-            'r': '♜', 'n': '♞', 'b': '♝', 'q': '♛', 'k': '♚', 'p': '♟',
+            'ROOK': '♜', 'KNIGHT': '♞', 'BISHOP': '♝', 'QUEEN': '♛', 'KING': '♚', 'PAWN': '♟',
             'R': '♖', 'N': '♘', 'B': '♗', 'Q': '♕', 'K': '♔', 'P': '♙'
         };
 
@@ -269,7 +329,7 @@
         let board = [];
         let selected = null;
         let state = 'menu'; // 'menu' or 'game'
-        let turn = 'w'; // 'w' for white, 'b' for black
+        let turn = 'WHITE'; // 'WHITE' for white, 'BLACK' for black
 
         function renderBoard() {
             const chessboard = document.getElementById('chessboard');
@@ -283,8 +343,11 @@
                     if (selected && selected.row === row && selected.col === col) {
                         square.style.outline = '2px solid #00f';
                     }
-                    const piece = board[row][col];
-                    if (piece) square.textContent = PIECES[piece];
+                    const piece = board.squares[row][col];
+                    if (piece) {
+                        square.textContent = PIECES[piece.type];
+                        square.style.color = piece.pieceColor === 'WHITE' ? '#fff' : '#000';
+                    }
                     square.addEventListener('click', onSquareClick);
                     chessboard.appendChild(square);
                 }
@@ -294,17 +357,29 @@
         function onSquareClick(e) {
             const row = parseInt(e.currentTarget.dataset.row);
             const col = parseInt(e.currentTarget.dataset.col);
-            const piece = board[row][col];
+            const piece = board.squares[row][col];
 
             if (selected) {
                 // Try to move
                 if ((selected.row !== row || selected.col !== col) &&
                         isValidMove(selected, {row, col})) {
-                    board[row][col] = board[selected.row][selected.col];
-                    board[selected.row][selected.col] = '';
+                    gameSocket.send(JSON.stringify({
+                        commandType: 'MAKE_MOVE',
+                        gameID: myGameId,
+                        move: {
+                            startPosition: {
+                                row: selected.row + 1,
+                                col: selected.col + 1
+                            },
+                            endPosition: {
+                                row: row + 1,
+                                col: col + 1
+                            },
+                            promotionPiece: null
+                        },
+                        authToken: JSON.parse(localStorage.getItem('user')).authToken
+                    }));
                     selected = null;
-                    turn = turn === 'w' ? 'b' : 'w';
-                    updateStatus();
                 } else {
                     selected = null;
                 }
@@ -315,21 +390,21 @@
         }
 
         function isPieceTurn(piece) {
-            return (turn === 'w' && piece === piece.toUpperCase()) ||
-                         (turn === 'b' && piece === piece.toLowerCase());
+            return (turn === 'WHITE' && piece.pieceColor === 'WHITE') ||
+                         (turn === 'BLACK' && piece.pieceColor === 'BLACK');
         }
 
         function isValidMove(from, to) {
             // For frontend demo: allow any move to empty or opponent's square
-            const movingPiece = board[from.row][from.col];
-            const targetPiece = board[to.row][to.col];
+            const movingPiece = board.squares[from.row][from.col];
+            const targetPiece = board.squares[to.row][to.col];
             if (!movingPiece) return false;
             if (targetPiece && isPieceTurn(targetPiece) === isPieceTurn(movingPiece)) return false;
             return true;
         }
 
         function updateStatus() {
-            document.getElementById('status').textContent = turn === 'w' ? "White's turn" : "Black's turn";
+            document.getElementById('status').textContent = turn === 'WHITE' ? "White's turn" : "Black's turn";
         }
 
         function resetBoard() {
@@ -343,15 +418,30 @@
         document.getElementById('resetBtn').addEventListener('click', resetBoard);
 
         function leaveGame() {
-            console.error('NOT IMPLEMENTED: leaving game');
+            gameSocket.send(JSON.stringify({
+                commandType: 'LEAVE',
+                gameID: myGameId,
+                authToken: JSON.parse(localStorage.getItem('user')).authToken
+            }));
+
+            myGameId = null;
+            state = menu;
+            turn = null;
+            selected = null;
+            board = [];
+
+            if (gameSocket) {
+                gameSocket.close();
+                gameSocket = null;
+            }
+
+            document.getElementById('chessboard').innerHTML = '';
             document.getElementById('game').style.display = 'none';
             document.getElementById('menu').style.display = 'flex';
         }
 
         document.getElementById('leaveGameBtn').addEventListener('click', leaveGame);
 
-        // Initialize
-        resetBoard();
         document.getElementById('status').textContent = localStorage.getItem('user') ? `Welcome back, ${JSON.parse(localStorage.getItem('user')).username}` : "Please log in or register to play chess.";
     </script>
 </body>
