@@ -184,7 +184,6 @@
         <div id="game">
             <div id="status">White's turn</div>
             <div id="chessboard"></div>
-            <button id="resetBtn">Reset Board</button>
             <button id="leaveGameBtn">Leave Game</button>
         </div>
         <div id="notifications">
@@ -303,6 +302,8 @@
                         const li = document.createElement('li');
                         li.textContent = message.message;
                         notifications.appendChild(li);
+                        const scrollContainer = document.getElementById('notifications');
+                        scrollContainer.scrollTop = scrollContainer.scrollHeight;
                         console.log('Notification:', message.message);
                     } else if (message.serverMessageType === 'ERROR') {
                         console.error('Error:', message.errorMessage);
@@ -312,6 +313,8 @@
                         li.style.color = 'red';
                         li.style.fontWeight = 'bold';
                         notifications.appendChild(li);
+                        const scrollContainer = document.getElementById('notifications');
+                        scrollContainer.scrollTop = scrollContainer.scrollHeight;
                     } else {
                         console.warn('Unknown message type:', message.serverMessageType);
                     }
@@ -490,7 +493,6 @@
             renderBoard();
         }
 
-        document.getElementById('resetBtn').addEventListener('click', resetBoard);
 
         function leaveGame() {
             gameSocket.send(JSON.stringify({
