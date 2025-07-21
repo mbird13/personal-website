@@ -78,10 +78,10 @@
             user-select: none;
         }
         .light {
-            background: #f0d9b5;
+            background: var(--square-color-light, #f0d9b5);
         }
         .dark {
-            background: #b58863;
+            background: var(--square-color-dark, #b58863);
         }
         #status {
             margin: 15px 0;
@@ -110,7 +110,7 @@
         }
 
         #gamesList {
-            background-color: #f0d9b5;
+            background-color: var(--square-color-light, #f0d9b5);
             flex: 1;
             border-radius: 10px;
             padding: 20px;
@@ -121,7 +121,7 @@
         }
 
         #customization {
-            background-color: #b58863;
+            background-color: var(--square-color-dark, #b58863);
             flex: 1;
             color: white;
             border-radius: 10px;
@@ -144,7 +144,7 @@
         }
 
         #notifications {
-            background-color: #f0d9b5;
+            background-color: var(--square-color-light, #f0d9b5);
             flex: 1;
             border-radius: 10px;
             padding: 20px;
@@ -178,6 +178,16 @@
         </div>
         <div id="customization">
             <h2>Customize Your Game</h2>
+            <input type="color" id="squareColorLight" value="#f0d9b5" />
+            <label for="squareColorLight">Light Square Color</label>
+            <input type="color" id="squareColorDark" value="#b58863" />
+            <label for="squareColorDark">Dark Square Color</label>
+            <br />
+            <br />
+            <input type="color" id="pieceColorWhite" value="#fff" />
+            <label for="pieceColorWhite">White Piece Color</label>
+            <input type="color" id="pieceColorBlack" value="#000" />
+            <label for="pieceColorBlack">Black Piece Color</label>
         </div>
     </div>
     <div id="inGame" style ="display: none;">
@@ -383,6 +393,39 @@
             }
         })
 
+        const pieceColorBlack = document.getElementById('pieceColorBlack');
+        const pieceColorWhite = document.getElementById('pieceColorWhite');
+        const squareColorLight = document.getElementById('squareColorLight');
+        const squareColorDark = document.getElementById('squareColorDark');
+
+        squareColorLight.addEventListener('input', (e) => {
+            document.documentElement.style.setProperty('--square-color-light', e.target.value);
+        });
+
+        squareColorDark.addEventListener('input', (e) => {
+            document.documentElement.style.setProperty('--square-color-dark', e.target.value);
+        });
+
+        pieceColorWhite.addEventListener('input', (e) => {
+            document.documentElement.style.setProperty('--piece-color-white', e.target.value);
+            // Update chess pieces color
+            for (const square of document.querySelectorAll('.square')) {
+                if (square.textContent && square.textContent === PIECES['PAWN']) {
+                    square.style.color = e.target.value;
+                }
+            }
+        });
+
+        pieceColorBlack.addEventListener('input', (e) => {
+            document.documentElement.style.setProperty('--piece-color-black', e.target.value);
+            // Update chess pieces color
+            for (const square of document.querySelectorAll('.square')) {
+                if (square.textContent && square.textContent === PIECES['PAWN']) {
+                    square.style.color = e.target.value;
+                }
+            }
+        });
+
         /**
          * Game Logic
          **/
@@ -424,7 +467,7 @@
                     const piece = board.squares[row][col];
                     if (piece) {
                         square.textContent = PIECES[piece.type];
-                        square.style.color = piece.pieceColor === 'WHITE' ? '#fff' : '#000';
+                        square.style.color = piece.pieceColor === 'WHITE' ? 'var(--piece-color-white, #fff)' : 'var(--piece-color-black, #000)';
                     }
                     square.addEventListener('click', onSquareClick);
                     chessboard.appendChild(square);
