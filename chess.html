@@ -178,16 +178,26 @@
         </div>
         <div id="customization">
             <h2>Customize Your Game</h2>
-            <input type="color" id="squareColorLight" value="#f0d9b5" />
-            <label for="squareColorLight">Light Square Color</label>
-            <input type="color" id="squareColorDark" value="#b58863" />
-            <label for="squareColorDark">Dark Square Color</label>
-            <br />
-            <br />
-            <input type="color" id="pieceColorWhite" value="#fff" />
-            <label for="pieceColorWhite">White Piece Color</label>
-            <input type="color" id="pieceColorBlack" value="#000" />
-            <label for="pieceColorBlack">Black Piece Color</label>
+            <div id="colorsGrid">
+                <div>
+                    <input type="color" id="squareColorLight" value="#f0d9b5" />
+                    <label for="squareColorLight">Light Square Color</label>
+                </div>
+                <div>
+                    <input type="color" id="squareColorDark" value="#b58863" />
+                    <label for="squareColorDark">Dark Square Color</label>
+                </div>
+                <div>
+                    <input type="color" id="pieceColorWhite" value="#ffffff" />
+                    <label for="pieceColorWhite">White Piece Color</label>
+                    <p style="font-size: 50px; color: var(--piece-color-white, #ffffff);">♟</p>
+                </div>
+                <div>
+                    <input type="color" id="pieceColorBlack" value="#000000" />
+                    <label for="pieceColorBlack">Black Piece Color</label>
+                    <p style="font-size: 50px; color: var(--piece-color-black, #000000);">♟</p>
+                </div>
+            </div>
         </div>
     </div>
     <div id="inGame" style ="display: none;">
@@ -234,23 +244,43 @@
                         games.push(game);
                         const li = document.createElement('li');
                         const div = document.createElement('div');
-                        const joinBtnWhite = document.createElement('button');
-                        joinBtnWhite.textContent = 'Join as White';
-                        joinBtnWhite.classList.add('join-btn');
-                        joinBtnWhite.style.backgroundColor = '#fff';
-                        joinBtnWhite.style.color = '#000';
-                        joinBtnWhite.style.border = '1px solid #000';
-                        joinBtnWhite.style.marginRight = '5px';  
-                        const joinBtnBlack = document.createElement('button');
-                        joinBtnBlack.textContent = 'Join as Black';
-                        joinBtnBlack.classList.add('join-btn');
-                        joinBtnBlack.style.backgroundColor = '#000';
+                        if (game.gameOver) {
+                            li.style.textDecoration = 'line-through';
+                            li.style.color = 'gray';
+                        }
+                        if (game.whiteUsername) {
+                            const whiteStatus = document.createElement('p');
+                            whiteStatus.textContent = `White: ${game.whiteUsername}`;
+                            whiteStatus.style.fontWeight = 'normal';
+                            div.appendChild(whiteStatus);
+                        } else {
+                            div.textContent = '';
+                            const joinBtnWhite = document.createElement('button');
+                            joinBtnWhite.textContent = 'Join as White';
+                            joinBtnWhite.classList.add('join-btn');
+                            joinBtnWhite.style.backgroundColor = '#fff';
+                            joinBtnWhite.style.color = '#000';
+                            joinBtnWhite.style.border = '1px solid #000';
+                            joinBtnWhite.style.marginRight = '5px';  
+                            div.appendChild(joinBtnWhite);
+                            joinBtnWhite.addEventListener('click', () => joinGame(game.gameID, 'WHITE'));
+                        }
+                        if (game.blackUsername) {
+                            const blackStatus = document.createElement('p');
+                            blackStatus.textContent = `Black: ${game.blackUsername}`;
+                            blackStatus.style.fontWeight = 'normal';
+                            div.appendChild(blackStatus);
+                        } else {
+                            // div.textContent += ' | Black: Waiting for player';
+                            const joinBtnBlack = document.createElement('button');
+                            joinBtnBlack.textContent = 'Join as Black';
+                            joinBtnBlack.classList.add('join-btn');
+                            joinBtnBlack.style.backgroundColor = '#000';
+                            div.appendChild(joinBtnBlack);
+                            joinBtnBlack.addEventListener('click', () => joinGame(game.gameID, 'BLACK'));
+                        }
                         li.textContent = game.gameName;
-                        div.appendChild(joinBtnWhite);
-                        div.appendChild(joinBtnBlack);
                         li.appendChild(div);
-                        joinBtnWhite.addEventListener('click', () => joinGame(game.gameID, 'WHITE'));
-                        joinBtnBlack.addEventListener('click', () => joinGame(game.gameID, 'BLACK'));
                         gameList.appendChild(li);
                     });
                 } else {
@@ -382,8 +412,8 @@
                     div.appendChild(joinBtnWhite);
                     div.appendChild(joinBtnBlack);
                     li.appendChild(div);
-                    joinBtnWhite.addEventListener('click', () => joinGame(game.gameID, 'WHITE'));
-                    joinBtnBlack.addEventListener('click', () => joinGame(game.gameID, 'BLACK'));
+                    joinBtnWhite.addEventListener('click', () => joinGame(newGame.gameID, 'WHITE'));
+                    joinBtnBlack.addEventListener('click', () => joinGame(newGame.gameID, 'BLACK'));
                     gameList.appendChild(li);
                 } else {
                     alert('Failed to create game. Please try again.');
