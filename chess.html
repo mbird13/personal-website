@@ -205,6 +205,7 @@
             <div id="status">White's turn</div>
             <div id="chessboard"></div>
             <button id="leaveGameBtn">Leave Game</button>
+            <button id="resignBtn">Resign</button>
         </div>
         <div id="notifications">
             <h2>Notifications</h2>
@@ -334,6 +335,7 @@
                         board = gameData.board;
                         turn = gameData.teamTurn;
                         gameOver = gameData.gameOver;
+                        winner = gameData.winner;
                         selected = null;
                         renderBoard();
                         updateStatus();
@@ -555,6 +557,10 @@
         }
 
         function updateStatus() {
+            if (gameOver) {
+                document.getElementById('status').textContent = `Game Over: ${winner} won!`;
+                return;
+            }
             document.getElementById('status').textContent = turn === 'WHITE' ? "White's turn" : "Black's turn";
         }
 
@@ -591,6 +597,17 @@
         }
 
         document.getElementById('leaveGameBtn').addEventListener('click', leaveGame);
+
+        document.getElementById('resignBtn').addEventListener('click', () => {
+            if (confirm('Are you sure you want to resign?')) {
+                gameSocket.send(JSON.stringify({
+                    commandType: 'RESIGN',
+                    gameID: myGameId,
+                    authToken: JSON.parse(localStorage.getItem('user')).authToken
+                }));
+                leaveGame();
+            }
+        });
 
         document.getElementById('status').textContent = localStorage.getItem('user') ? `Welcome back, ${JSON.parse(localStorage.getItem('user')).username}` : "Please log in or register to play chess.";
     </script>
