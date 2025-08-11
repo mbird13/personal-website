@@ -228,7 +228,7 @@
             try {
                 const user = JSON.parse(localStorage.getItem('user')) || null;
                 if (!user) {
-                    window.location.href = '/chessLogin.html';
+                    window.location.href = '/chess/chessLogin.html';
                     return;
                 }
 
@@ -286,11 +286,11 @@
                     });
                 } else {
                     console.error('Failed to fetch games list');
-                    window.location.href = '/chessLogin.html';
+                    window.location.href = '/chess/chessLogin.html';
                 }
             } catch (error) {
                 console.error('Error fetching games list:', error);
-                window.location.href = '/chessLogin.html';
+                window.location.href = '/chess/chessLogin.html';
             }
         }
 
@@ -381,7 +381,7 @@
             try {
                 const user = JSON.parse(localStorage.getItem('user')) || null;
                 if (!user) {
-                    window.location.href = '/chessLogin.html';
+                    window.location.href = '/chess/chessLogin.html';
                     return;
                 }
 
