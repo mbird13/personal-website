@@ -112,7 +112,7 @@
                 if (r.ok) {
                     console.log('Login successful:', j);
                     localStorage.setItem('user', JSON.stringify(j));
-                    window.location.href = '/chess.html';
+                    window.location.href = '/chess/chess.html';
                 } else {
                     alert('Login failed. Please check your credentials.');
                 }
@@ -140,7 +140,7 @@
                 if (r.ok) {
                     console.log('Registration successful:', j);
                     localStorage.setItem('user', JSON.stringify(j));
-                    window.location.href = '/chess.html';
+                    window.location.href = '/chess/chess.html';
                 } else {
                     alert('Registration failed. Please check your credentials.');
                 }
