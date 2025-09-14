@@ -68,22 +68,18 @@
         }
 
         .shelf-item {
-            position: relative;
-            top: -15px;
-            left: 30px;
-            display: inline-block;
             margin-right: 10px;
-            box-shadow: 0px 15px 15px 0px rgba(0, 0, 0, .7);
+            box-shadow: 0px 6px 6px 0px rgba(0, 0, 0, .5);
             background-color: white;;
             border-radius: 5px;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
-            height: 30px;
+            height: 50px;
             }
 
         .shelf-item:hover {
             transform: scale(1.1);
             transform: translateY(-5px);
-            box-shadow: 0px 20px 20px 0px rgba(0, 0, 0, .6);
+            box-shadow: 0px 20px 20px 0px rgba(0, 0, 0, .4);
         }
 
         .full-screen {
@@ -102,6 +98,14 @@
             background-color: rgba(255, 255, 255, 0.99);
             border-radius: 10px;
             box-shadow: 2px 2px 4px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .project-container {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px;
         }
 
         .flex-row {
@@ -188,6 +192,14 @@
             margin-left: 1.5rem;
         }
 
+        .project-img {
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-style: solid;
+            border-color: rgb(69, 188, 224, 1);
+            border-width: 3px;
+        }
+
 
     </style>
 </head>
@@ -229,17 +241,30 @@
     <section class="full-screen projects flex-row">
         <div class="card">
             <h2 class="section-title">Projects</h2>
-                <img src="Resources/chessIcon.png" alt="Chess Project" class="project-img" style="height: 30%;">
-                <img src="Resources/minesweeper.png" alt="Minesweeper Project" class="project-img" style="height: 30%;">
-                <ul>
-                <li><strong>Chess</strong>: <a href="/chess/chess.html" target="_blank">Play Chess Online</a></li>
-                <li><strong>Minesweeper</strong>: <a href="/minesweeper.html" target="_blank">Play Minesweeper</a></li>
-                </ul>
-        </div>
-        </section>
-        <section class="full-screen experience flex-row">
-    <div class="card experience">
-            <h2 class="section-title">Experience</h2>
+            <div class="flex-row" style="justify-content: center; align-items: center; height: 80%;">
+                <div class="project-container">
+                    <img src="Resources/chessIcon.png" alt="Chess Project" class="project-img" style="height: 50%;">
+                    <button class="button" onclick="window.open('Resources/chess.html', '_blank');"> Play Chess Online</button>
+                    <button class="button" onclick="window.open('https://github.com/mbird13/chess', '_blank');"> View Github</button>
+                </div>
+                <div class="project-container">
+                    <img src="Resources/quicksortIcon.png" alt="Quicksort" class="project-img" style="height: 50%;">
+                    <button class="button" onclick="window.open('https://github.com/mbird13/Quicksort', '_blank');"> View Github</button>
+                </div>
+                <div class="project-container">
+                    <img src="Resources/mazeIcon.png" alt="Maze Solver" class="project-img" style="height: 50%;">
+                    <button class="button" onclick="window.open('https://github.com/mbird13/3DMaze', '_blank');"> View Github</button>
+                </div>
+                <div class="project-container">
+                    <img src="Resources/BSTIcon.png" alt="BST Project" class="project-img" style="height: 50%;">
+                    <button class="button" onclick="window.open('https://github.com/mbird13/BST', '_blank');"> View Github</button>
+                </div>
+
+        </div>  
+            </section>
+            <section class="full-screen experience flex-row">
+        <div class="card experience">
+                <h2 class="section-title">Experience</h2>
             <ul>
                 <li><strong>Web Developer</strong> at Brigham Young University (2024 - Present)</li>
             </ul>
@@ -255,19 +280,20 @@
         </div>
 </section>
     <section class="full-screen contact-info">
-            <h2 class="section-title">Contact Information</h2>
+        <h2 class="section-title">Contact Information</h2>
             <p>Email: <a href="mailto:mbird14@byu.edu">mbird14@byu.edu</a></p>
             <p>LinkedIn: <a href="https://linkedin.com/in/mark-r-bird" target="_blank">linkedin.com/in/mark-r-bird</a></p>
             <p>GitHub: <a href="https://github.com/mbird13" target="_blank">github.com/mbird13</a></p>
+        <div class="flex-row" style="justify-content: center; align-items: center; height: 30%;">
+            <a href="https://github.com/mbird13" target="_blank">
+                <img class="shelf-item" src="Resources/github-mark.png" alt="GitHub Logo">
+            </a>
+            <a href="https://linkedin.com/in/mark-r-bird" target="_blank">
+                <img class="shelf-item" src="Resources/LI-In-Bug.png" alt="LinkedIn Logo">
+            </a>
+        </div>
     </section>
     <section class="footer">
-        <!--<div class="glass-shelf"></div>-->
-        <a href="https://github.com/mbird13" target="_blank">
-            <img class="shelf-item" src="Resources/github-mark.png" alt="GitHub Logo">
-        </a>
-        <a href="https://linkedin.com/in/mark-r-bird" target="_blank">
-            <img class="shelf-item" src="Resources/LI-In-Bug.png" alt="LinkedIn Logo">
-        </a>
     </section>
 </body>
 </html>
